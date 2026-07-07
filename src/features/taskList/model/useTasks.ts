@@ -38,7 +38,7 @@ export function useTasks(): UseTasksHook {
   })
 
   const removeTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id))
+    setTasks((prev) => prev.filter((task) => task.id !== id))
   }
 
   return { tasks: filteredTasks, filter, setFilter, removeTask }
