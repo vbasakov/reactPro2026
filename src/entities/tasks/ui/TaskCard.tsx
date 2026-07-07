@@ -1,16 +1,14 @@
+import { memo } from 'react'
+
 import type { Task } from '../model/types'
 import styles from './TaskCard.module.css'
 
-type Props = {
-  task: Task
-}
-
-export function TaskCard({ task }: Props) {
+export const TaskCard = memo(function TaskCard({ title, completed }: Task) {
   return (
     <div
-      className={task.completed ? styles.completedTask : styles.incompletedTask}
+      className={completed ? styles.completedTask : styles.incompletedTask}
     >
-      {task.title}
+      {title}
     </div>
   )
-}
+})
