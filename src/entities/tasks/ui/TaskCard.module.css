@@ -1,0 +1,7 @@
+.completedTask {
+  color: green;
+}
+
+.incompletedTask {
+  color: blue;
+}
