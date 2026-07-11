@@ -30,7 +30,7 @@ export function TaskList() {
         {tasks.map((task) => (
           <div key={task.id} className={styles.taskRow}>
             <button onClick={() => removeTask(task.id)}>x</button>
-            <TaskCard task={task} />
+            <TaskCard title={task.title} completed={task.completed} />
           </div>
         ))}
       </div>
