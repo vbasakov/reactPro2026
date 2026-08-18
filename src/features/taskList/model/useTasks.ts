@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import type { Task } from 'entities/tasks'
 import type { Filter } from 'shared/filters'
 
@@ -31,15 +31,17 @@ export function useTasks(): UseTasksHook {
   const [tasks, setTasks] = useState(initialTasks)
   const [filter, setFilter] = useState<Filter>('all')
 
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === 'incomplete') return !task.completed
-    if (filter === 'completed') return task.completed
-    return true //all
-  })
+  const filteredTasks = useMemo(() => {
+      return tasks.filter((task) => {
+        if (filter === 'incomplete') return !task.completed
+        if (filter === 'completed') return task.completed
+        return true //all
+      })
+    }, [filter, tasks])
 
-  const removeTask = (id: string) => {
+  const removeTask = useCallback((id: string) => {
     setTasks((prev) => prev.filter((task) => task.id !== id))
-  }
+  }, [])
 
   return { tasks: filteredTasks, filter, setFilter, removeTask }
 }
