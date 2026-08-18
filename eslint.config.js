@@ -69,6 +69,10 @@ export default [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
 
+      // Не используем set-state-in-effect, т.к. в задании требуется
+      // синхронизация RTK Query данных с локальным useState через useEffect
+      'react-hooks/set-state-in-effect': 'off',
+
       'boundaries/element-types': [
         'error',
         {

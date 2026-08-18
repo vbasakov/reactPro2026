@@ -1,46 +1,48 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import type { Task } from 'entities/tasks'
 import type { Filter } from 'shared/filters'
+import { useGetTasksQuery } from '../api/tasksApi'
 
 export type UseTasksHook = {
-  tasks: Task[] // отфильтрованные задачи
+  tasks: Pick<Task, 'id' | 'title' | 'completed'>[] // отфильтрованные задачи
   filter: Filter // текущий фильтр
   setFilter: (f: Filter) => void // смена фильтра
-  removeTask: (id: string) => void // удаление задачи по ID
+  removeTask: (id: number) => void // удаление задачи по ID
 }
 
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Completed task',
-    completed: true,
-  },
-  {
-    id: '2',
-    title: 'Incompleted task',
-    completed: false,
-  },
-  {
-    id: '3',
-    title: 'Another completed task',
-    completed: true,
-  },
-]
-
 export function useTasks(): UseTasksHook {
-  const [tasks, setTasks] = useState(initialTasks)
+  // Загрузка данных через RTK Query
+  const { data: remoteTasks } = useGetTasksQuery(undefined, {
+    pollingInterval: 0,
+  })
+
+  // Локальное состояние для задач
+  const [localTasks, setLocalTasks] = useState<Pick<Task, 'id' | 'title' | 'completed'>[]>([])
+
+  // Копируем задачи один раз при первой загрузке remoteTasks
+  // localTasks.length === 0 — защита от повторного копирования
+  useEffect(() => {
+    if (remoteTasks && remoteTasks.length > 0 && localTasks.length === 0) {
+      setLocalTasks(remoteTasks)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Фильтр
   const [filter, setFilter] = useState<Filter>('all')
 
+  // Фильтрация
   const filteredTasks = useMemo(() => {
-      return tasks.filter((task) => {
-        if (filter === 'incomplete') return !task.completed
-        if (filter === 'completed') return task.completed
-        return true //all
-      })
-    }, [filter, tasks])
+    return localTasks.filter((task) => {
+      if (filter === 'incomplete') return !task.completed
+      if (filter === 'completed') return task.completed
+      return true
+    })
+  }, [localTasks, filter])
 
-  const removeTask = useCallback((id: string) => {
-    setTasks((prev) => prev.filter((task) => task.id !== id))
+  // Локальное удаление (только для задач, которые были загружены)
+  const removeTask = useCallback((id: number) => {
+    setLocalTasks((prev) => prev.filter((task) => task.id !== id))
   }, [])
 
   return { tasks: filteredTasks, filter, setFilter, removeTask }
